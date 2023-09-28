@@ -1,0 +1,277 @@
+
+<!--21MID0043   ARIF.K  AWT_LAB_DA_2    THE 8 PUZZLE PROBLEM -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>21MID0043_8 Puzzle Problem</title>
+
+    <!--CSS code-->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+            background-color: #1E2A38;
+            color: #ffffff;
+        }
+
+        .game-container {
+            background-color: #34495E;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            text-align: left;
+        }
+
+        .puzzle-container {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 5px;
+            margin: 20px auto;
+        }
+
+        .tile {
+            width: 100px;
+            height: 100px;
+            border: 1px solid #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            background-color: #2C3E50; 
+        }
+
+        .instructions {
+            margin-bottom: 20px;
+            font-size: 18px;
+            line-height: 1.6;
+            text-align: left;
+            padding: 10px;
+            background-color: #2C3E50; 
+            border-radius: 5px;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            color: #ffffff; 
+        }
+
+        .instructions h2 {
+            font-size: 24px;
+            margin-top: 0;
+        }
+
+        .instructions ul {
+            list-style-type: square;
+            margin-left: 20px;
+            padding: 0;
+        }
+
+        .step-counter {
+            font-size: 18px;
+        }
+
+        .congratulations {
+            color: #2ECC71; 
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        h1 {
+            font-size: 36px;
+        }
+
+        button {
+            font-size: 16px;
+            padding: 10px 20px;
+            margin: 5px;
+        }
+
+        .timer {
+            font-size: 20px;
+            color: #2ECC71; 
+        }
+
+        .loss-message {
+            font-size: 20px;
+            color: #E74C3C; 
+            font-weight: bold;
+        }
+
+        @media (orientation: landscape) {
+            .game-container {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                flex-direction: row;
+            }
+
+            .puzzle-container {
+                margin: 20px;
+            }
+
+            button {
+                margin: 5px;
+            }
+        }
+    </style>
+</head>
+<!--HTML Code-->
+
+<body>
+    <h1>8 Puzzle Game</h1>
+    <div class="game-container">
+        <div class="instructions">
+            <h2>Welcome to the 8 Puzzle Game!</h2>
+            <ul>
+              <h3> Instructions: </h3>
+                <li>Rearrange the blocks to get them in order.</li>
+                <li>Click on a tile adjacent to the empty square to slide it into the empty space.</li>
+                <li>Use the buttons to manually move tiles.</li>
+            </ul>
+        </div>
+        <div class="puzzle-container" id="puzzleContainer"></div>
+        <div>
+            <p class="step-counter">Steps taken: <span id="stepCounter">0</span></p>
+            <p class="timer" id="timer">Time: 0 seconds</p>
+            <p class="loss-message" id="lossMessage" style="display:none">Sorry, you lost.</p>
+            <p class="congratulations" id="congratulationsMessage" style="display:none">Congratulations! You solved the problem.</p>
+            <button onclick="move('up')">Move Up</button>
+            <button onclick="move('down')">Move Down</button>
+            <button onclick="move('left')">Move Left</button>
+            <button onclick="move('right')">Move Right</button>
+        </div>
+    </div>
+
+    <!--Script code-->
+
+    <script>
+        const puzzleContainer = document.getElementById('puzzleContainer');
+        const stepCounter = document.getElementById('stepCounter');
+        const congratulationsMessage = document.getElementById('congratulationsMessage');
+        const lossMessage = document.getElementById('lossMessage');
+        const timerElement = document.getElementById('timer');
+
+        let puzzleState = shuffle([1, 2, 3, 4, 5, 6, 7, 8, null]);
+        let steps = 0;
+        let startTime = null;
+        let timerInterval = null;
+
+        function updateUI() {
+            puzzleContainer.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const tile = document.createElement('div');
+                tile.classList.add('tile');
+                tile.textContent = puzzleState[i] !== null ? puzzleState[i] : '';
+                tile.dataset.index = i;
+                tile.addEventListener('click', handleTileClick);
+                puzzleContainer.appendChild(tile);
+            }
+            stepCounter.textContent = steps;
+        }
+
+        function handleTileClick() {
+            const index = parseInt(this.dataset.index);
+
+            if (puzzleState[index] !== null) {
+                const adjacentIndices = [
+                    index - 3, index + 3,
+                    index % 3 !== 0 ? index - 1 : null,
+                    index % 3 !== 2 ? index + 1 : null
+                ];
+
+                const emptyIndex = puzzleState.indexOf(null);
+
+                if (adjacentIndices.includes(emptyIndex)) {
+                    puzzleState[emptyIndex] = puzzleState[index];
+                    puzzleState[index] = null;
+                    steps++;
+                    updateUI();
+
+                    if (puzzleState.join('') === '12345678') {
+                         congratulationsMessage.style.display = 'block';
+                         clearInterval(timerInterval); 
+                          } else if (elapsedTime >= 300) {
+                              clearInterval(timerInterval);
+                               lossMessage.style.display = 'block';
+}
+
+                }
+            }
+        }
+
+        function move(direction) {
+            const emptyIndex = puzzleState.indexOf(null);
+            let targetIndex;
+
+            switch (direction) {
+                case 'up':
+                    targetIndex = emptyIndex + 3;
+                    break;
+                case 'down':
+                    targetIndex = emptyIndex - 3;
+                    break;
+                case 'left':
+                    targetIndex = emptyIndex + 1;
+                    break;
+                case 'right':
+                    targetIndex = emptyIndex - 1;
+                    break;
+                default:
+                    return;
+            }
+
+            if (targetIndex >= 0 && targetIndex <= 8) {
+                puzzleState[emptyIndex] = puzzleState[targetIndex];
+                puzzleState[targetIndex] = null;
+                steps++;
+                updateUI();
+
+                if (puzzleState.join('') === '12345678') {
+                    congratulationsMessage.style.display = 'block';
+                    clearInterval(timerInterval);
+                } else if (steps >= 5) {
+                    clearInterval(timerInterval);
+                    lossMessage.style.display = 'block';
+                }
+            }
+        }
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+
+            return array;
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+        const currentTime = Date.now();
+        const elapsedTime = Math.floor((currentTime - startTime) / 1000);
+        timerElement.textContent = `Time: ${elapsedTime} seconds`;
+
+        if (elapsedTime >= 300 && !congratulationsMessage.style.display && !lossMessage.style.display) {
+        clearInterval(timerInterval);
+        lossMessage.style.display = 'block';
+    }
+}
+
+
+        updateUI();
+        startTimer();
+    </script>
+</body>
+
+</html>
